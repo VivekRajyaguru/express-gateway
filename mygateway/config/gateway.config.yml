@@ -1,0 +1,65 @@
+http:
+  port: 8080
+admin:
+  port: 9876
+  hostname: localhost
+apiEndpoints:
+  admin:
+    host: localhost
+    #path: ['/admin/*', '/get/*', '/post/*', '/common/*']
+    path: ['/admin/*', '/common/*']
+  read:
+    host: localhost
+    paths: ['/get/*', '/common/*']
+    #scopes: ['read']
+  post:
+    host: localhost
+    path: ['/get/*', '/post/*', '/common/*']
+    method: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    #scopes: ['write', 'admin']
+  
+serviceEndpoints:
+  usermgmt:
+    url: 'http://localhost:8000/'
+  adminmgmt:
+    url: 'http://localhost:8000/'  
+policies:
+  - basic-auth
+  - cors
+  - expression
+  - key-auth
+  - log
+  - oauth2
+  - proxy
+  - rate-limit
+pipelines:
+  default:
+    apiEndpoints:
+      - read
+      - post
+    policies:
+      - key-auth:
+      - proxy:
+          - action:
+              serviceEndpoint: usermgmt 
+              changeOrigin: true
+      - rate-limit:
+        - action:
+          max: 10
+          windowMS: 1000
+          statusCode: 400
+          message: 'Too Many Request Try after some time!'
+  admin:
+    apiEndpoints:
+      - admin
+    policies:
+      - proxy:
+          - action:
+              serviceEndpoint: adminmgmt 
+              changeOrigin: true
+      - rate-limit:
+        - action:
+          max: 10
+          windowMS: 1000
+          statusCode: 400
+          message: 'Too Many Request Try after some time!'

@@ -1,0 +1,10 @@
+- group: user
+  permission: 
+    - resources: get/*
+      methods: 
+        - GET
+        - POST
+        - DELETE
+        - OPTIONS
+      action: allow
+    
